@@ -26,12 +26,12 @@ downscale_cru <- function(x, cru_path, wc_dir, varname, mode = "auto", parallel 
   }
 
   anomaly_fun <- switch(mode,
-                             "temp" = `-`,
-                             "prec" = `/`)
+                        "temp" = `-`,
+                        "prec" = `/`)
 
   anomaly_rev_fun <- switch(mode,
-                             "temp" = `+`,
-                             "prec" = `*`)
+                            "temp" = `+`,
+                            "prec" = `*`)
 
   if (parallel & require("parallel")) {
     mfun <- parallel::mcmapply
