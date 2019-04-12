@@ -18,13 +18,8 @@
 #' @references Mosier, T. M., Hill, D. F., & Sharp, K. V. (2014). 30-Arcsecond
 #'   monthly climate surfaces with global land coverage. International Journal
 #'   of Climatology, 34(7), 2175–2188. https://doi.org/10.1002/joc.3829
-#' @import ncdf4
-#' @importFrom dplyr select bind_rows arrange
-#' @importFrom raster brick extract subset getZ mean
-#' @importFrom magrittr %>%
-#' @importFrom tidyr gather
-#' @importFrom sp coordinates proj4string
 #' @keywords manip
+#' @importFrom rlang !!
 #' @export
 downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", id = "id", parallel = TRUE) {
 
