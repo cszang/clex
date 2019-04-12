@@ -27,7 +27,7 @@ get_anomaly_rev_fun <- function(mode) {
 
 #' @keywords internal
 get_mfun <- function(parallel) {
-  if (parallel & require("parallel")) {
+  if (parallel & requireNamespace("parallel", quietly = TRUE)) {
     parallel::mcmapply
   } else {
     mapply
@@ -36,7 +36,7 @@ get_mfun <- function(parallel) {
 
 #' @keywords internal
 get_lfun <- function(parallel) {
-  if (parallel & require("parallel")) {
+  if (parallel & requireNamespace("parallel", quietly = TRUE)) {
     parallel::mclapply
   } else {
     lapply
