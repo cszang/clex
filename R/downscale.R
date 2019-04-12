@@ -80,9 +80,9 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", id = "id", par
   }
 
   # prepare nice output
-  down <- dplyr::bind_rows(down) %>%
-    dplyr::select(id, year, month, !!varname) %>%
-    dplyr::arrange(id, year, month)
-
+  down <- Reduce(rbind, down)
+  down <- down[c(id, "year", "month", varname)]
+  down <- down[order(down[[id]], down$year, down$month), ]
+  rownames(down) <- NULL
   down
 }
