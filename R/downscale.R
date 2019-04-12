@@ -9,6 +9,8 @@
 #'   respective climate parameter
 #' @param varname the name of the climate variable in the NetCDF file
 #' @param mode either "auto", or one of "temp" or "prec"
+#' @param id character string indicating name of column in x that holds unique
+#'   location ids
 #' @param parallel if TRUE (default), some parts of the code are run in parallel
 #'   for speed gain
 #' @return a tidy data.frame with id, year, month, and the extracted climate
@@ -24,7 +26,7 @@
 #' @importFrom sp coordinates proj4string
 #' @keywords manip
 #' @export
-downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", parallel = TRUE) {
+downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", id = "id", parallel = TRUE) {
 
   mode <- automode(mode, varname)
   anomaly_fun <- get_anomaly_fun(mode)
@@ -71,7 +73,7 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", parallel = TRU
     down[[i]] <- round(down[[i]], 2)
     down[[i]] <- as.data.frame(down[[i]])
     colnames(down[[i]]) <- myears[[i]]
-    down[[i]]$id <- x$id
+    down[[i]][[id]] <- x[[id]]
     down[[i]] <- tidyr::gather(down[[i]], year, !!varname, -id)
     down[[i]]$year <- as.numeric(down[[i]]$year)
     down[[i]]$month <- i

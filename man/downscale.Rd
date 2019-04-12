@@ -4,7 +4,8 @@
 \alias{downscale}
 \title{Downscale monthly climate data to 30 arcseconds using Worldclim data}
 \usage{
-downscale(x, nc_path, wc_dir, varname, mode = "auto", parallel = TRUE)
+downscale(x, nc_path, wc_dir, varname, mode = "auto", id = "id",
+  parallel = TRUE)
 }
 \arguments{
 \item{x}{a data.frame with at least id, lon, and lat}
@@ -17,6 +18,9 @@ respective climate parameter}
 \item{varname}{the name of the climate variable in the NetCDF file}
 
 \item{mode}{either "auto", or one of "temp" or "prec"}
+
+\item{id}{character string indicating name of column in x that holds unique
+location ids}
 
 \item{parallel}{if TRUE (default), some parts of the code are run in parallel
 for speed gain}
