@@ -1,52 +1,46 @@
-#' Downscale CRU TS data to 30 arcseconds using Worldclim data
+#' Downscale monthly climate data to 30 arcseconds using Worldclim data
 #'
+#' Currently, CRU TS 4.01 is supported out of the box; for E-OBS > 18e, NetCDF
+#' files with monthly resolution have to be produced first, e.g. using CDO
+#' commands.
 #' @param x a data.frame with at least id, lon, and lat
-#' @param cru_path absolute path to the NetCDF file with CRU climate data
-#' @param wc_dir absolute path to the WorldClim v2.0 TIF files for the respective climate parameter
-#' @param varname the name of the variable in the CRU TS NetCDF file
+#' @param nc_path absolute path to the NetCDF file with monthly climate data
+#' @param wc_dir absolute path to the WorldClim v2.0 TIF files for the
+#'   respective climate parameter
+#' @param varname the name of the climate variable in the NetCDF file
 #' @param mode either "auto", or one of "temp" or "prec"
-#' @param parallel if TRUE (default), some parts of the code are run in parallel for speed gain
-#'
-#' @return a tidy data.frame with id, year, month, and the extracted climate variable
+#' @param parallel if TRUE (default), some parts of the code are run in parallel
+#'   for speed gain
+#' @return a tidy data.frame with id, year, month, and the extracted climate
+#'   variable
+#' @references Mosier, T. M., Hill, D. F., & Sharp, K. V. (2014). 30-Arcsecond
+#'   monthly climate surfaces with global land coverage. International Journal
+#'   of Climatology, 34(7), 2175–2188. https://doi.org/10.1002/joc.3829
 #' @import ncdf4
 #' @importFrom dplyr select bind_rows arrange
 #' @importFrom raster brick extract subset getZ mean
 #' @importFrom magrittr %>%
 #' @importFrom tidyr gather
 #' @importFrom sp coordinates proj4string
+#' @keywords manip
 #' @export
-downscale_cru <- function(x, cru_path, wc_dir, varname, mode = "auto", parallel = TRUE) {
+downscale <- function(x, nc_path, wc_dir, varname, mode = "auto", parallel = TRUE) {
 
-  if (mode == "auto") {
-    if (varname %in% c("tavg", "tmin", "tmax", "tmean", "tmp", "temp")) {
-      mode <- "temp"
-    } else {
-      mode <- "prec"
-    }
-  }
+  mode <- automode(mode, varname)
+  anomaly_fun <- get_anomaly_fun(mode)
+  anomaly_rev_fun <- get_anomaly_rev_fun(mode)
+  mfun <- get_mfun(parallel)
+  lfun <- get_lfun(parallel)
 
-  anomaly_fun <- switch(mode,
-                        "temp" = `-`,
-                        "prec" = `/`)
-
-  anomaly_rev_fun <- switch(mode,
-                            "temp" = `+`,
-                            "prec" = `*`)
-
-  if (parallel & require("parallel")) {
-    mfun <- parallel::mcmapply
-    lfun <- parallel::mclapply
-  } else {
-    mfun <- mapply
-    lfun <- lapply
-  }
-
-  crubrick <- raster::brick(cru_path, varname = varname)
+  ncbrick <- raster::brick(nc_path, varname = varname)
 
   # month/date information
-  dates <- raster::getZ(crubrick)
+  dates <- raster::getZ(ncbrick)
   years <- as.numeric(unique(substr(dates, 1, 4)))
   all_months <- as.numeric(substr(dates, 6, 7))
+  # this is needed for data that does not cover entire years, like e-obs18e
+  all_years <- as.numeric(substr(dates, 1, 4))
+  myears <- lapply(1:12, function(x) all_years[which(all_months == x)])
   month_seq_all <- lapply(1:12, function(x) which(all_months == x))
   climatology_start <- 1970 # for WorldClim 2.0
   climatology_end <- 2000   # for WorldClim 2.0
@@ -55,11 +49,11 @@ downscale_cru <- function(x, cru_path, wc_dir, varname, mode = "auto", parallel 
   month_seq_clim <- lapply(month_seq_all, function(x) x[clim_start_index:clim_end_index])
 
   # compute climatologies
-  month_subsets_clim <- lfun(month_seq_clim, function(x) raster::subset(crubrick, x))
+  month_subsets_clim <- lfun(month_seq_clim, function(x) raster::subset(ncbrick, x))
   climatology <- lfun(month_subsets_clim, function(x) raster::mean(x, na.rm = TRUE))
 
   # compute coarse anomalies
-  month_subsets_all <- lfun(month_seq_all, function(x) raster::subset(crubrick, x))
+  month_subsets_all <- lfun(month_seq_all, function(x) raster::subset(ncbrick, x))
   anomalies <- mfun(anomaly_fun, month_subsets_all, climatology)
 
   # interpolate anomalies to points of interest
@@ -76,9 +70,10 @@ downscale_cru <- function(x, cru_path, wc_dir, varname, mode = "auto", parallel 
   for (i in seq_along(down)) {
     down[[i]] <- round(down[[i]], 2)
     down[[i]] <- as.data.frame(down[[i]])
-    colnames(down[[i]]) <- years
+    colnames(down[[i]]) <- myears[[i]]
     down[[i]]$id <- x$id
     down[[i]] <- tidyr::gather(down[[i]], year, !!varname, -id)
+    down[[i]]$year <- as.numeric(down[[i]]$year)
     down[[i]]$month <- i
   }
 

@@ -1,10 +1,10 @@
 Package: clex
 Type: Package
-Title: Extract and optionally downscale climate data from various sources
+Title: Statistical downscaling of monthly climate data
 Version: 0.1.0
 Author: Christian Zang
 Maintainer: Christian Zang <christian.zang@wzw.tum.de>
-Description: Extract and optionally downscale climate data from various sources
+Description: Extract and downscale climate data from various sources to WorldClim resolution
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
