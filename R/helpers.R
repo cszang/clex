@@ -1,10 +1,17 @@
 #' @keywords internal
 automode <- function(.mode, .varname) {
   if (.mode == "auto") {
-    if (.varname %in% c("tavg", "tmin", "tmax", "tmean", "tmp", "temp", "tg")) {
+    if (.varname %in% c("tavg", "tmean", "tmp", "tg",
+                        "tmin", "tmn", "tn",
+                        "tmax", "tmx", "tx",
+                        "temp")) {
       "temp"
     } else {
-      "prec"
+      if (.varname %in% c("prec", "pre", "rr")) {
+        "prec"
+      } else {
+        stop("Variable name not recognised. Please provide 'temp' or 'prec' for `mode`.")
+      }
     }
   } else {
     .mode
