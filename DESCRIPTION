@@ -1,13 +1,18 @@
 Package: clex
 Type: Package
 Title: Statistical downscaling of monthly climate data
-Version: 0.1.0
+Version: 0.2.0
 Author: Christian Zang
 Maintainer: Christian Zang <christian.zang@wzw.tum.de>
 Description: Extract and downscale climate data from various sources to WorldClim resolution.
-  This statistical downscaling approach follows Mosier et al. 2014 Int. J. Climatol.
-Depends: R (>= 3.1.0)
+  This statistical downscaling approach follows Mosier et al. 2014 Int. J. Climatol. Furtermore,
+  the package contains functionality to add several drought indices (De Martonne Index, SPEI, SPI)
+  to a data.frame of climate variables.
+Depends:
+  R (>= 3.1.0),
+  stats
 Imports:
+  SPEI,
   ncdf4,
   sp,
   raster,
