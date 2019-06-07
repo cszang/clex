@@ -7,7 +7,7 @@ automode <- function(.mode, .varname) {
                         "temp")) {
       "temp"
     } else {
-      if (.varname %in% c("prec", "pre", "rr")) {
+      if (.varname %in% c("prec", "pre", "rr", "precip")) {
         "prec"
       } else {
         stop("Variable name not recognised. Please provide 'temp' or 'prec' for `mode`.")
@@ -49,3 +49,4 @@ get_lfun <- function(parallel) {
     lapply
   }
 }
+
