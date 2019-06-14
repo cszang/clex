@@ -17,7 +17,8 @@ Imports:
   sp,
   raster,
   tidyr,
-  rlang
+  rlang,
+  dplyr
 Suggests:
   parallel
 License: GPL-3
