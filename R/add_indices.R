@@ -34,6 +34,7 @@ add_indices <- function(x, scales = c(1, 2, 3, 6, 12), id = "id", lat = "lat", t
       ts_prec <- stats::ts(.x[[prec]], start = c(.x$year[1], .x$month[1]), frequency = 12)
       ts_pet <- SPEI::hargreaves(ts_tmin, ts_tmax, Ra = NA, lat = .lat, Pre = ts_prec)
       ts_cwb <- ts_prec - ts_pet
+      .x$cwd <- round(as.vector(ts_cwb), 2)
       spei <- lapply(scales, function(x) round(SPEI::spei(ts_cwb, scale = x)$fitted, 2))
       spi <- lapply(scales, function(x) round(SPEI::spi(ts_prec, scale = x)$fitted, 2))
       for (j in 1:n_scales) {
@@ -46,7 +47,7 @@ add_indices <- function(x, scales = c(1, 2, 3, 6, 12), id = "id", lat = "lat", t
       }
     } else {
       ## write NA dummy output
-      .x$dmi <- NA_real_
+      .x$dmi <- .x$cwd <- NA_real_
       for (j in 1:n_scales) {
         spei_name <- paste0("spei", scales[j])
         .x[[spei_name]] <- NA_real_
@@ -58,8 +59,8 @@ add_indices <- function(x, scales = c(1, 2, 3, 6, 12), id = "id", lat = "lat", t
     }
     out[[i]] <- .x
   }
-  
-  out <- Reduce(rbind, out)
+
+  out <- dplyr::bind_rows(out)
   if (drop_lat) {
     out[[lat]] <- NULL
   }
