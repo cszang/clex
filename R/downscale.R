@@ -1,32 +1,32 @@
 #' Downscale monthly climate data to 30 arcseconds using Worldclim data
 #'
-#' Currently, CRU TS 4.01 is supported out of the box; for E-OBS >
-#' 18e, NetCDF files with monthly resolution have to be produced
-#' first, e.g. using CDO commands.
+#' Currently, CRU TS 4.01 is supported out of the box; for E-OBS > 18e, NetCDF
+#' files with monthly resolution have to be produced first, e.g. using CDO
+#' commands.
 #' @param x a data.frame with at least id, lon, and lat
-#' @param nc_path absolute path to the NetCDF file with monthly
-#'   climate data
+#' @param nc_path absolute path to the NetCDF file with monthly climate data
 #' @param wc_dir absolute path to the WorldClim v2.0 TIF files for the
 #'   respective climate parameter
 #' @param varname the name of the climate variable in the NetCDF file
 #' @param mode either "auto", or one of "temp" or "prec"
-#' @param id character string indicating name of column in x that
-#'   holds unique location ids
-#' @param parallel if TRUE (default), some parts of the code are run
-#'   in parallel for speed gain
-#' @param wc_bilinear if TRUE, bilinearly interpolate worldclim data
-#'   as well
-#' @return a tidy data.frame with id, year, month, and the extracted
-#'   climate variable
-#' @references Mosier, T. M., Hill, D. F., & Sharp,
-#'   K. V. (2014). 30-Arcsecond monthly climate surfaces with global
-#'   land coverage. International Journal of Climatology, 34(7),
-#'   2175–2188. https://doi.org/10.1002/joc.3829
+#' @param id character string indicating name of column in x that holds unique
+#'   location ids
+#' @param parallel if TRUE (default), some parts of the code are run in parallel
+#'   for speed gain
+#' @param use_chelsa if TRUE, use CHELSA data instead of WorldClim for
+#'   downscaling
+#' @param wc_bilinear if TRUE, bilinearly interpolate worldclim data as well
+#' @return a tidy data.frame with id, year, month, and the extracted climate
+#'   variable
+#' @references Mosier, T. M., Hill, D. F., & Sharp, K. V. (2014). 30-Arcsecond
+#'   monthly climate surfaces with global land coverage. International Journal
+#'   of Climatology, 34(7), 2175–2188. https://doi.org/10.1002/joc.3829
 #' @keywords manip
 #' @importFrom rlang !!
 #' @export
 downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
-                      id = "id", parallel = TRUE, wc_bilinear = FALSE) {
+                      id = "id", parallel = TRUE, use_chelsa = FALSE,
+                      wc_bilinear = FALSE) {
 
   mode <- automode(mode, varname)
   anomaly_fun <- get_anomaly_fun(mode)
@@ -65,7 +65,13 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
   e_anom <- lfun(anomalies, function(y) raster::extract(y, x, method = "bilinear"))
 
   # replay Worldclim anomalies
-  wc <- lapply(list.files(wc_dir, full.names = TRUE, pattern = "[0-9]{2}\\.tif$"),
+  if (use_chelsa) {
+    wc_pattern <- "land\\.tif$"
+  } else {
+    wc_pattern <- "[0-9]{2}\\.tif$"
+  }
+
+  wc <- lapply(list.files(wc_dir, full.names = TRUE, pattern = wc_pattern),
                raster::brick)
   if (wc_bilinear) {
     e_wc <- lfun(wc, function(y) raster::extract(y, x, method = "bilinear")[, 1])

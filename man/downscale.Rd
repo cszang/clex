@@ -5,13 +5,12 @@
 \title{Downscale monthly climate data to 30 arcseconds using Worldclim data}
 \usage{
 downscale(x, nc_path, wc_dir, varname, mode = "auto", id = "id",
-  parallel = TRUE, wc_bilinear = FALSE)
+  parallel = TRUE, use_chelsa = FALSE, wc_bilinear = FALSE)
 }
 \arguments{
 \item{x}{a data.frame with at least id, lon, and lat}
 
-\item{nc_path}{absolute path to the NetCDF file with monthly
-climate data}
+\item{nc_path}{absolute path to the NetCDF file with monthly climate data}
 
 \item{wc_dir}{absolute path to the WorldClim v2.0 TIF files for the
 respective climate parameter}
@@ -20,28 +19,29 @@ respective climate parameter}
 
 \item{mode}{either "auto", or one of "temp" or "prec"}
 
-\item{id}{character string indicating name of column in x that
-holds unique location ids}
+\item{id}{character string indicating name of column in x that holds unique
+location ids}
 
-\item{parallel}{if TRUE (default), some parts of the code are run
-in parallel for speed gain}
+\item{parallel}{if TRUE (default), some parts of the code are run in parallel
+for speed gain}
 
-\item{wc_bilinear}{if TRUE, bilinearly interpolate worldclim data
-as well}
+\item{use_chelsa}{if TRUE, use CHELSA data instead of WorldClim for
+downscaling}
+
+\item{wc_bilinear}{if TRUE, bilinearly interpolate worldclim data as well}
 }
 \value{
-a tidy data.frame with id, year, month, and the extracted
-  climate variable
+a tidy data.frame with id, year, month, and the extracted climate
+  variable
 }
 \description{
-Currently, CRU TS 4.01 is supported out of the box; for E-OBS >
-18e, NetCDF files with monthly resolution have to be produced
-first, e.g. using CDO commands.
+Currently, CRU TS 4.01 is supported out of the box; for E-OBS > 18e, NetCDF
+files with monthly resolution have to be produced first, e.g. using CDO
+commands.
 }
 \references{
-Mosier, T. M., Hill, D. F., & Sharp,
-  K. V. (2014). 30-Arcsecond monthly climate surfaces with global
-  land coverage. International Journal of Climatology, 34(7),
-  2175–2188. https://doi.org/10.1002/joc.3829
+Mosier, T. M., Hill, D. F., & Sharp, K. V. (2014). 30-Arcsecond
+  monthly climate surfaces with global land coverage. International Journal
+  of Climatology, 34(7), 2175–2188. https://doi.org/10.1002/joc.3829
 }
 \keyword{manip}
