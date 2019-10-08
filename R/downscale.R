@@ -78,6 +78,9 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
   } else {
     e_wc <- lfun(wc, function(y) raster::extract(y, x)[, 1])
   }
+  if (use_chelsa & (mode == "temp")) {
+    e_wc <- lapply(e_wc, function(x) x/10)
+  }
   down <- mfun(anomaly_rev_fun, e_anom, e_wc, SIMPLIFY = FALSE)
   for (i in seq_along(down)) {
     down[[i]] <- round(down[[i]], 2)
