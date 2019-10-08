@@ -26,7 +26,7 @@
 #' @export
 downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
                       id = "id", parallel = TRUE, use_chelsa = FALSE,
-                      wc_bilinear = FALSE) {
+                      wc_bilinear = FALSE, verbose = TRUE) {
 
   mode <- automode(mode, varname)
   anomaly_fun <- get_anomaly_fun(mode)
@@ -51,18 +51,24 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
   month_seq_clim <- lapply(month_seq_all, function(x) x[clim_start_index:clim_end_index])
 
   # compute climatologies
+  if (verbose) cat("computing climatologies from timeseries... ")
   month_subsets_clim <- lfun(month_seq_clim, function(x) raster::subset(ncbrick, x))
   climatology <- lfun(month_subsets_clim, function(x) raster::mean(x, na.rm = TRUE))
+  if (verbose) cat("done\n")
 
   # compute coarse anomalies
+  if (verbose) cat("computing anomalies... ")
   month_subsets_all <- lfun(month_seq_all, function(x) raster::subset(ncbrick, x))
   anomalies <- mfun(anomaly_fun, month_subsets_all, climatology)
+  if (verbose) cat("done\n")
 
   # interpolate anomalies to points of interest
   PROJ <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
   sp::coordinates(x) <- ~ lon + lat
   sp::proj4string(x) <- PROJ
+  if (verbose) cat("interpolating anomalies... ")
   e_anom <- lfun(anomalies, function(y) raster::extract(y, x, method = "bilinear"))
+  if (verbose) cat("done\n")
 
   # replay Worldclim anomalies
   if (use_chelsa) {
@@ -71,16 +77,23 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
     wc_pattern <- "[0-9]{2}\\.tif$"
   }
 
+  if (verbose) cat("reading reference climatologies... ")
   wc <- lapply(list.files(wc_dir, full.names = TRUE, pattern = wc_pattern),
                raster::brick)
+  if (verbose) cat("done.\n")
+
+  if (verbose) cat("extract climatologies... ")
   if (wc_bilinear) {
     e_wc <- lfun(wc, function(y) raster::extract(y, x, method = "bilinear")[, 1])
   } else {
     e_wc <- lfun(wc, function(y) raster::extract(y, x)[, 1])
   }
   if (use_chelsa & (mode == "temp")) {
+    if (verbose) cat("adjusting CHELSA temp data... ")
     e_wc <- lapply(e_wc, function(x) x/10)
+    if (verbose) cat("done.\n")
   }
+  if (verbose) cat("downscaling... ")
   down <- mfun(anomaly_rev_fun, e_anom, e_wc, SIMPLIFY = FALSE)
   for (i in seq_along(down)) {
     down[[i]] <- round(down[[i]], 2)
@@ -91,11 +104,14 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
     down[[i]]$year <- as.numeric(down[[i]]$year)
     down[[i]]$month <- i
   }
+  if (verbose) cat("done\n")
 
   # prepare nice output
+  if (verbose) cat("preparing output... ")
   down <- Reduce(rbind, down)
   down <- down[c(id, "year", "month", varname)]
   down <- down[order(down[[id]], down$year, down$month), ]
   rownames(down) <- NULL
+  if (verbose) cat("done & bye!\n")
   down
 }
