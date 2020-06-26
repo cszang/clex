@@ -2,4 +2,5 @@
 
 export(add_indices)
 export(downscale)
+export(interpolate)
 importFrom(rlang,"!!")

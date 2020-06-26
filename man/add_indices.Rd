@@ -4,9 +4,17 @@
 \alias{add_indices}
 \title{Add drought indices to a data.frame of climate variables}
 \usage{
-add_indices(x, scales = c(1, 2, 3, 6, 12), id = "id", lat = "lat",
-  tmean = "tmean", tmin = "tmin", tmax = "tmax", prec = "prec",
-  drop_lat = TRUE)
+add_indices(
+  x,
+  scales = c(1, 2, 3, 6, 12),
+  id = "id",
+  lat = "lat",
+  tmean = "tmean",
+  tmin = "tmin",
+  tmax = "tmax",
+  prec = "prec",
+  drop_lat = TRUE
+)
 }
 \arguments{
 \item{x}{a data.frame with climate data, that has at least id for location

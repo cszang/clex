@@ -4,9 +4,18 @@
 \alias{downscale}
 \title{Downscale monthly climate data to 30 arcseconds using Worldclim data}
 \usage{
-downscale(x, nc_path, wc_dir, varname, mode = "auto", id = "id",
-  parallel = TRUE, use_chelsa = FALSE, wc_bilinear = FALSE,
-  verbose = TRUE)
+downscale(
+  x,
+  nc_path,
+  wc_dir,
+  varname,
+  mode = "auto",
+  id = "id",
+  parallel = TRUE,
+  use_chelsa = FALSE,
+  wc_bilinear = FALSE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{a data.frame with at least id, lon, and lat}
