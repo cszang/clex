@@ -30,6 +30,13 @@ downscale <- function(x, nc_path, wc_dir, varname, mode = "auto",
 
   if (verbose) cat("Hi! This takes a while. Better grab a sandwich!\n")
 
+  if (require(rstudioapi, quietly = TRUE) & parallel) {
+    if (rstudioapi::isAvailable()) {
+      parallel <- FALSE
+      cat("Setting `parallel` to FALSE due to issues with interactive parallel::mcmapply() use.\n")
+    }
+  }
+
   mode <- automode(mode, varname)
   anomaly_fun <- get_anomaly_fun(mode)
   anomaly_rev_fun <- get_anomaly_rev_fun(mode)
